@@ -1,1 +1,20 @@
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soundscape Story Starter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Soundscape Story Starter</h1>
+    <script>
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+        // Other JavaScript code...
+    </script>
+</body>
+</html>
