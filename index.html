@@ -5,32 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SoundScape Story Starter</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f4; color: #333; }
-        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
-        h1 { text-align: center; }
-        .story { margin-top: 20px; padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        body { font-family: Arial, sans-serif; }
+        header { text-align: center; margin: 20px; }
+        #recorder { margin: 20px; }
+        #playBtn { display: none; }
     </style>
 </head>
 <body>
-    <div class="container">
+    <header>
         <h1>SoundScape Story Starter</h1>
-        <div id="story" class="story"></div>
-    </div>
+        <button id="startBtn">Start Recording</button>
+        <button id="stopBtn" disabled>Stop Recording</button>
+        <button id="playBtn" disabled>Play Sound</button>
+    </header>
     <script>
-        function formatTime(date) {
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            const seconds = String(date.getSeconds()).padStart(2, '0');
-            return `${hours}:${minutes}:${seconds}`;
-        }
+        let mediaRecorder;
+        let audioChunks = [];
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const playBtn = document.getElementById('playBtn');
 
-        function generateStory() {
-            const now = new Date();
-            const formattedTime = formatTime(now);
-            return `The current time is ${formattedTime}. This is the beginning of our SoundScape story!`;
-        }
+        startBtn.onclick = async () => {
+            audioChunks = [];
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = event => {
+                audioChunks.push(event.data);
+            };
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks);
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const audio = new Audio(audioUrl);
+                playBtn.onclick = () => {
+                    audio.play();
+                };
+                playBtn.disabled = false;
+            };
+            mediaRecorder.start();
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+        };
 
-        document.getElementById('story').innerHTML = generateStory();
+        stopBtn.onclick = () => {
+            mediaRecorder.stop();
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+        };
     </script>
 </body>
 </html>
