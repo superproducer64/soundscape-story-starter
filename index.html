@@ -3,18 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Soundscape Story Starter</title>
-    <link rel="stylesheet" href="style.css">
+    <title>SoundScape Story Starter</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; }
+        .story { margin-top: 20px; padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    </style>
 </head>
 <body>
-    <h1>Soundscape Story Starter</h1>
+    <div class="container">
+        <h1>SoundScape Story Starter</h1>
+        <div id="story" class="story"></div>
+    </div>
     <script>
-        function formatTime(seconds) {
-            const mins = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        function formatTime(date) {
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
         }
-        // Other JavaScript code...
+
+        function generateStory() {
+            const now = new Date();
+            const formattedTime = formatTime(now);
+            return `The current time is ${formattedTime}. This is the beginning of our SoundScape story!`;
+        }
+
+        document.getElementById('story').innerHTML = generateStory();
     </script>
 </body>
 </html>
