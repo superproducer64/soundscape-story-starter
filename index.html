@@ -2,129 +2,878 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>SoundScape Story Starter</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         body {
-            background: linear-gradient(to right, #2c3e50, #3498db);
-            color: white;
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #cbd5e1;
+            font-size: 0.9rem;
+        }
+
+        .status-banner {
+            background: #334155;
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            border: 1px solid #475569;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .status-banner.error {
+            background: #7f1d1d;
+            border-color: #991b1b;
+        }
+
+        .status-banner.success {
+            background: #14532d;
+            border-color: #166534;
+        }
+
+        .status-banner.warning {
+            background: #713f12;
+            border-color: #92400e;
+        }
+
+        .recording-panel {
+            background: #1e293b;
+            border-radius: 20px;
+            padding: 40px 20px;
+            margin-bottom: 24px;
+            border: 1px solid #334155;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .recording-controls {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
+            gap: 20px;
         }
-        #controls {
-            margin: 10px;
-        }
-        button {
-            background-color: #e74c3c;
+
+        .record-button {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
             border: none;
+            background: #10b981;
             color: white;
-            padding: 10px 20px;
             cursor: pointer;
-            border-radius: 5px;
-            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
         }
-        button:hover {
-            background-color: #c0392b;
+
+        .record-button:active {
+            transform: scale(0.95);
         }
-        #recordingsList {
-            margin-top: 20px;
-            max-width: 400px;
+
+        .record-button.recording {
+            background: #ef4444;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+
+        .timer {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #10b981;
+            font-family: 'Courier New', monospace;
+            min-height: 50px;
+        }
+
+        .recording-label {
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+
+        .recordings-section {
+            background: #1e293b;
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid #334155;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .recordings-list {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        .recording-item {
+            background: #334155;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid #475569;
+        }
+
+        .recording-header {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            align-items: flex-start;
+        }
+
+        .play-button {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            background: #10b981;
+            color: white;
+            cursor: pointer;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .recording-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .recording-meta {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+
+        .sound-type-select {
+            background: #475569;
+            color: white;
+            border: 1px solid #64748b;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 0.85rem;
+        }
+
+        .duration {
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+
+        .notes-input {
             width: 100%;
+            background: #475569;
+            color: white;
+            border: 1px solid #64748b;
+            border-radius: 6px;
+            padding: 10px 12px;
+            font-size: 0.9rem;
+            font-family: inherit;
+        }
+
+        .notes-input:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+
+        .timestamp {
+            color: #64748b;
+            font-size: 0.75rem;
+            margin-top: 8px;
+        }
+
+        .delete-button {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: transparent;
+            color: #ef4444;
+            cursor: pointer;
+            flex-shrink: 0;
+            font-size: 1.2rem;
+        }
+
+        .generate-button {
+            width: 100%;
+            background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 18px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+        }
+
+        .generate-button:active {
+            transform: translateY(1px);
+        }
+
+        .generate-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .empty-state {
+            background: #1e293b;
+            border-radius: 20px;
+            padding: 60px 24px;
+            text-align: center;
+            border: 1px solid #334155;
+        }
+
+        .empty-state h3 {
+            color: #94a3b8;
+            font-size: 1.1rem;
+            margin: 16px 0 8px 0;
+        }
+
+        .empty-state p {
+            color: #64748b;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .debug-info {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 0.75rem;
+            font-family: monospace;
+            margin-top: 12px;
+            color: #94a3b8;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 12px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .recording-panel {
+                padding: 30px 15px;
+            }
+
+            .timer {
+                font-size: 2rem;
+            }
+
+            .record-button {
+                width: 80px;
+                height: 80px;
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>SoundScape Story Starter</h1>
-    <div id="controls">
-        <div>
-            <select id="soundType">
-                <option value="ambient">Ambient Sound</option>
-                <option value="music">Music</option>
-                <option value="effects">Sound Effects</option>
-            </select>
-            <input type="text" id="notes" placeholder="Notes..." />
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎙️ SoundScape Story Starter</h1>
+            <p>Capture sounds, craft stories</p>
         </div>
-        <br />
-        <button id="startButton">Start Recording</button>
-        <button id="stopButton" disabled>Stop Recording</button>
-        <div id="timer">00:00</div>
+
+        <!-- Status Banner -->
+        <div id="statusBanner" class="status-banner hidden"></div>
+
+        <!-- Recording Panel -->
+        <div class="recording-panel">
+            <div class="recording-controls">
+                <div id="timer" class="timer"></div>
+                <button id="recordButton" class="record-button">🎤</button>
+                <p class="recording-label" id="recordingLabel">Tap to start recording</p>
+            </div>
+        </div>
+
+        <!-- Recordings Section -->
+        <div id="recordingsSection" class="hidden">
+            <div class="recordings-section">
+                <div class="section-header">
+                    🔊 Your Sound Collection (<span id="recordingCount">0</span>)
+                </div>
+                <div class="recordings-list" id="recordingsList"></div>
+            </div>
+
+            <button id="generateButton" class="generate-button">
+                📄 Generate Story Template
+            </button>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state">
+            <div style="font-size: 3rem; margin-bottom: 12px;">🔇</div>
+            <h3>No sounds captured yet</h3>
+            <p>Tap the microphone to start</p>
+        </div>
+
+        <!-- Debug Info -->
+        <div id="debugInfo" class="debug-info hidden"></div>
     </div>
-    <div id="recordingsList"></div>
-    <button id="generateTemplate">Generate Story Template</button>
 
     <script>
-        let mediaRecorder;
-        let audioChunks = [];
-        let recordingTime;
-        let timerInterval;
+        class SoundScapeApp {
+            constructor() {
+                this.recordings = [];
+                this.isRecording = false;
+                this.mediaRecorder = null;
+                this.audioChunks = [];
+                this.currentAudio = null;
+                this.startTime = null;
+                this.timerInterval = null;
+                this.stream = null;
+                
+                this.initializeElements();
+                this.checkBrowserSupport();
+                this.attachEventListeners();
+                this.loadFromStorage();
+            }
 
-        document.getElementById('startButton').addEventListener('click', async () => {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream);
-            audioChunks = [];
-            mediaRecorder.ondataavailable = event => {
-                audioChunks.push(event.data);
-            };
-            mediaRecorder.start();
-            recordingTime = 0;
-            document.getElementById('stopButton').disabled = false;
-            document.getElementById('startButton').disabled = true;
-            startTimer();
+            log(message, type = 'info') {
+                const debugInfo = document.getElementById('debugInfo');
+                const timestamp = new Date().toLocaleTimeString();
+                const entry = `[${timestamp}] ${message}`;
+                console.log(entry);
+                
+                const div = document.createElement('div');
+                div.textContent = entry;
+                div.style.color = type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#94a3b8';
+                debugInfo.insertBefore(div, debugInfo.firstChild);
+                
+                // Keep only last 10 entries
+                while (debugInfo.children.length > 10) {
+                    debugInfo.removeChild(debugInfo.lastChild);
+                }
+            }
 
-            mediaRecorder.onstop = () => {
-                const audioBlob = new Blob(audioChunks);
-                addRecording(audioBlob);
-            };
-        });
+            showStatus(message, type = 'info') {
+                const banner = document.getElementById('statusBanner');
+                banner.textContent = message;
+                banner.className = `status-banner ${type}`;
+                banner.classList.remove('hidden');
+                
+                if (type !== 'error') {
+                    setTimeout(() => {
+                        banner.classList.add('hidden');
+                    }, 5000);
+                }
+            }
 
-        document.getElementById('stopButton').addEventListener('click', () => {
-            mediaRecorder.stop();
-            document.getElementById('stopButton').disabled = true;
-            document.getElementById('startButton').disabled = false;
-            clearInterval(timerInterval);
-        });
+            initializeElements() {
+                this.recordButton = document.getElementById('recordButton');
+                this.timer = document.getElementById('timer');
+                this.recordingLabel = document.getElementById('recordingLabel');
+                this.recordingsSection = document.getElementById('recordingsSection');
+                this.recordingsList = document.getElementById('recordingsList');
+                this.recordingCount = document.getElementById('recordingCount');
+                this.generateButton = document.getElementById('generateButton');
+                this.emptyState = document.getElementById('emptyState');
+            }
 
-        function startTimer() {
-            recordingTime = 0;
-            timerInterval = setInterval(() => {
-                recordingTime++;
-                const minutes = Math.floor(recordingTime / 60);
-                const seconds = recordingTime % 60;
-                document.getElementById('timer').textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-            }, 1000);
+            checkBrowserSupport() {
+                this.log('Checking browser support...');
+                
+                // Check HTTPS or localhost
+                const isSecure = window.location.protocol === 'https:' || 
+                               window.location.hostname === 'localhost' || 
+                               window.location.hostname === '127.0.0.1' ||
+                               window.location.hostname.startsWith('192.168.') ||
+                               window.location.hostname.startsWith('10.') ||
+                               window.location.hostname.endsWith('.local');
+                
+                this.log(`Protocol: ${window.location.protocol}`);
+                this.log(`Hostname: ${window.location.hostname}`);
+                this.log(`Is secure context: ${isSecure}`);
+                
+                if (!isSecure) {
+                    this.showStatus('⚠️ Not secure! Use HTTPS, localhost, or local IP (192.168.x.x). Run start-server.py', 'error');
+                }
+                
+                // Check MediaDevices API
+                if (!navigator.mediaDevices) {
+                    this.log('MediaDevices API not available', 'error');
+                    this.showStatus('❌ Your browser doesn\'t support audio recording', 'error');
+                    return;
+                }
+                
+                if (!navigator.mediaDevices.getUserMedia) {
+                    this.log('getUserMedia not available', 'error');
+                    this.showStatus('❌ getUserMedia not supported', 'error');
+                    return;
+                }
+                
+                this.log('Browser support check passed', 'success');
+                
+                // Try to enumerate devices
+                if (navigator.mediaDevices.enumerateDevices) {
+                    navigator.mediaDevices.enumerateDevices()
+                        .then(devices => {
+                            const audioInputs = devices.filter(d => d.kind === 'audioinput');
+                            this.log(`Found ${audioInputs.length} audio input device(s)`);
+                            
+                            if (audioInputs.length === 0) {
+                                this.showStatus('⚠️ No microphone detected', 'warning');
+                            } else {
+                                this.showStatus(`✅ Ready! Found ${audioInputs.length} microphone(s)`, 'success');
+                            }
+                        })
+                        .catch(err => {
+                            this.log(`Could not enumerate devices: ${err.message}`, 'error');
+                        });
+                }
+            }
+
+            attachEventListeners() {
+                this.recordButton.addEventListener('click', () => this.toggleRecording());
+                this.generateButton.addEventListener('click', () => this.generateStoryTemplate());
+            }
+
+            async toggleRecording() {
+                this.log('Toggle recording clicked');
+                
+                if (!this.isRecording) {
+                    await this.startRecording();
+                } else {
+                    this.stopRecording();
+                }
+            }
+
+            async startRecording() {
+                this.log('Attempting to start recording...');
+                
+                try {
+                    // Request microphone access with specific constraints
+                    this.log('Requesting microphone access...');
+                    
+                    const constraints = {
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true
+                        }
+                    };
+                    
+                    this.stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    this.log('✓ Microphone access granted', 'success');
+                    this.showStatus('🎤 Recording started!', 'success');
+                    
+                    // Create MediaRecorder
+                    const options = { mimeType: 'audio/webm' };
+                    
+                    // Try different mime types if webm not supported
+                    if (!MediaRecorder.isTypeSupported('audio/webm')) {
+                        this.log('audio/webm not supported, trying alternatives...');
+                        
+                        if (MediaRecorder.isTypeSupported('audio/mp4')) {
+                            options.mimeType = 'audio/mp4';
+                            this.log('Using audio/mp4');
+                        } else if (MediaRecorder.isTypeSupported('audio/ogg')) {
+                            options.mimeType = 'audio/ogg';
+                            this.log('Using audio/ogg');
+                        } else {
+                            delete options.mimeType;
+                            this.log('Using default mime type');
+                        }
+                    }
+                    
+                    this.mediaRecorder = new MediaRecorder(this.stream, options);
+                    this.audioChunks = [];
+
+                    this.mediaRecorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) {
+                            this.audioChunks.push(event.data);
+                            this.log(`Chunk received: ${event.data.size} bytes`);
+                        }
+                    };
+
+                    this.mediaRecorder.onstop = () => {
+                        this.log('MediaRecorder stopped');
+                        const mimeType = this.mediaRecorder.mimeType;
+                        const audioBlob = new Blob(this.audioChunks, { type: mimeType });
+                        this.log(`Created blob: ${audioBlob.size} bytes, type: ${audioBlob.type}`);
+                        this.saveRecording(audioBlob);
+                        
+                        // Stop all tracks
+                        if (this.stream) {
+                            this.stream.getTracks().forEach(track => {
+                                track.stop();
+                                this.log('Track stopped');
+                            });
+                            this.stream = null;
+                        }
+                    };
+
+                    this.mediaRecorder.onerror = (event) => {
+                        this.log(`MediaRecorder error: ${event.error}`, 'error');
+                        this.showStatus('❌ Recording error', 'error');
+                    };
+
+                    this.mediaRecorder.start();
+                    this.log(`MediaRecorder started in state: ${this.mediaRecorder.state}`);
+                    
+                    this.isRecording = true;
+                    this.startTime = Date.now();
+                    
+                    this.updateUIForRecording(true);
+                    this.startTimer();
+                    
+                } catch (error) {
+                    this.log(`Error: ${error.name} - ${error.message}`, 'error');
+                    
+                    let message = '❌ Cannot access microphone\n\n';
+                    
+                    if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+                        message += '• Tap "Allow" when prompted\n';
+                        message += '• Check browser permissions\n';
+                        message += '• Make sure no other app is using the mic';
+                    } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+                        message += '• No microphone found\n';
+                        message += '• Check device connections';
+                    } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+                        message += '• Microphone is busy\n';
+                        message += '• Close other apps using the mic\n';
+                        message += '• Try restarting your browser';
+                    } else if (error.name === 'SecurityError') {
+                        message += '• Use HTTPS or localhost\n';
+                        message += '• Run: python3 start-server.py\n';
+                        message += '• Then open the URL shown';
+                    } else {
+                        message += '• Try a different browser\n';
+                        message += '• Check system permissions\n';
+                        message += `• Error: ${error.message}`;
+                    }
+                    
+                    this.showStatus(message, 'error');
+                }
+            }
+
+            stopRecording() {
+                this.log('Stopping recording...');
+                
+                if (this.mediaRecorder && this.isRecording) {
+                    this.mediaRecorder.stop();
+                    this.isRecording = false;
+                    this.stopTimer();
+                    this.updateUIForRecording(false);
+                    this.log('Recording stopped', 'success');
+                }
+            }
+
+            startTimer() {
+                this.timer.textContent = '0:00';
+                this.timerInterval = setInterval(() => {
+                    const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+                    this.timer.textContent = this.formatTime(elapsed);
+                }, 100);
+            }
+
+            stopTimer() {
+                if (this.timerInterval) {
+                    clearInterval(this.timerInterval);
+                    this.timerInterval = null;
+                }
+                this.timer.textContent = '';
+            }
+
+            updateUIForRecording(recording) {
+                if (recording) {
+                    this.recordButton.classList.add('recording');
+                    this.recordButton.textContent = '⬛';
+                    this.recordingLabel.textContent = 'Recording... (tap to stop)';
+                } else {
+                    this.recordButton.classList.remove('recording');
+                    this.recordButton.textContent = '🎤';
+                    this.recordingLabel.textContent = 'Tap to start recording';
+                }
+            }
+
+            saveRecording(blob) {
+                const duration = Math.floor((Date.now() - this.startTime) / 1000);
+                const recording = {
+                    id: Date.now(),
+                    url: URL.createObjectURL(blob),
+                    timestamp: new Date().toLocaleString(),
+                    duration: duration,
+                    notes: '',
+                    soundType: 'natural'
+                };
+
+                this.recordings.unshift(recording);
+                this.log(`Recording saved: ${duration}s`, 'success');
+                this.showStatus('✅ Sound captured!', 'success');
+                this.renderRecordings();
+            }
+
+            renderRecordings() {
+                if (this.recordings.length === 0) {
+                    this.recordingsSection.classList.add('hidden');
+                    this.emptyState.classList.remove('hidden');
+                    return;
+                }
+
+                this.recordingsSection.classList.remove('hidden');
+                this.emptyState.classList.add('hidden');
+                this.recordingCount.textContent = this.recordings.length;
+
+                this.recordingsList.innerHTML = this.recordings.map(recording => `
+                    <div class="recording-item">
+                        <div class="recording-header">
+                            <button class="play-button" onclick="app.togglePlay(${recording.id})">
+                                <span id="playIcon-${recording.id}">▶</span>
+                                <span id="pauseIcon-${recording.id}" class="hidden">⏸</span>
+                            </button>
+                            <div class="recording-info">
+                                <div class="recording-meta">
+                                    <select class="sound-type-select" onchange="app.updateSoundType(${recording.id}, this.value)">
+                                        <option value="natural" ${recording.soundType === 'natural' ? 'selected' : ''}>Natural</option>
+                                        <option value="manmade" ${recording.soundType === 'manmade' ? 'selected' : ''}>Man-Made</option>
+                                    </select>
+                                    <span class="duration">${this.formatTime(recording.duration)}</span>
+                                </div>
+                                <input 
+                                    type="text" 
+                                    class="notes-input" 
+                                    placeholder="Describe this sound..."
+                                    value="${recording.notes}"
+                                    onchange="app.updateNotes(${recording.id}, this.value)"
+                                >
+                                <p class="timestamp">${recording.timestamp}</p>
+                            </div>
+                            <button class="delete-button" onclick="app.deleteRecording(${recording.id})">🗑️</button>
+                        </div>
+                        <audio id="audio-${recording.id}" src="${recording.url}"></audio>
+                    </div>
+                `).join('');
+            }
+
+            togglePlay(id) {
+                const recording = this.recordings.find(r => r.id === id);
+                if (!recording) return;
+
+                const audio = document.getElementById(`audio-${id}`);
+                const playIcon = document.getElementById(`playIcon-${id}`);
+                const pauseIcon = document.getElementById(`pauseIcon-${id}`);
+
+                if (this.currentAudio && this.currentAudio !== audio) {
+                    this.currentAudio.pause();
+                    this.currentAudio.currentTime = 0;
+                    const prevId = this.currentAudio.id.split('-')[1];
+                    document.getElementById(`playIcon-${prevId}`).classList.remove('hidden');
+                    document.getElementById(`pauseIcon-${prevId}`).classList.add('hidden');
+                }
+
+                if (audio.paused) {
+                    audio.play();
+                    this.currentAudio = audio;
+                    playIcon.classList.add('hidden');
+                    pauseIcon.classList.remove('hidden');
+
+                    audio.onended = () => {
+                        playIcon.classList.remove('hidden');
+                        pauseIcon.classList.add('hidden');
+                    };
+                } else {
+                    audio.pause();
+                    audio.currentTime = 0;
+                    playIcon.classList.remove('hidden');
+                    pauseIcon.classList.add('hidden');
+                    this.currentAudio = null;
+                }
+            }
+
+            updateNotes(id, notes) {
+                const recording = this.recordings.find(r => r.id === id);
+                if (recording) {
+                    recording.notes = notes;
+                }
+            }
+
+            updateSoundType(id, soundType) {
+                const recording = this.recordings.find(r => r.id === id);
+                if (recording) {
+                    recording.soundType = soundType;
+                }
+            }
+
+            deleteRecording(id) {
+                if (confirm('Delete this recording?')) {
+                    this.recordings = this.recordings.filter(r => r.id !== id);
+                    this.renderRecordings();
+                    this.log('Recording deleted');
+                }
+            }
+
+            formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${mins}:${secs.toString().padStart(2, '0')}`;
+            }
+
+            generateStoryTemplate() {
+                this.log('Generating story template...');
+                this.generateButton.disabled = true;
+                this.generateButton.textContent = '⏳ Generating...';
+
+                setTimeout(() => {
+                    const template = this.createStoryTemplate();
+                    this.downloadTemplate(template);
+                    this.generateButton.disabled = false;
+                    this.generateButton.textContent = '📄 Generate Story Template';
+                    this.log('Template generated and downloaded', 'success');
+                    this.showStatus('✅ Template downloaded!', 'success');
+                }, 500);
+            }
+
+            createStoryTemplate() {
+                const naturalSounds = this.recordings.filter(r => r.soundType === 'natural');
+                const manMadeSounds = this.recordings.filter(r => r.soundType === 'manmade');
+                
+                let template = `SOUNDSCAPE STORY STARTER\n`;
+                template += `Generated: ${new Date().toLocaleString()}\n`;
+                template += `Total Recordings: ${this.recordings.length}\n\n`;
+                template += `═══════════════════════════════════════\n\n`;
+                
+                template += `THE SONIC LANDSCAPE\n\n`;
+                
+                if (naturalSounds.length > 0) {
+                    template += `Natural Sounds (${naturalSounds.length}):\n`;
+                    naturalSounds.forEach((r, i) => {
+                        template += `  ${i + 1}. ${r.notes || 'Untitled sound'} [${this.formatTime(r.duration)}]\n`;
+                        template += `     Captured: ${r.timestamp}\n`;
+                    });
+                    template += `\n`;
+                }
+                
+                if (manMadeSounds.length > 0) {
+                    template += `Man-Made Sounds (${manMadeSounds.length}):\n`;
+                    manMadeSounds.forEach((r, i) => {
+                        template += `  ${i + 1}. ${r.notes || 'Untitled sound'} [${this.formatTime(r.duration)}]\n`;
+                        template += `     Captured: ${r.timestamp}\n`;
+                    });
+                    template += `\n`;
+                }
+                
+                template += `═══════════════════════════════════════\n\n`;
+                template += `STORY PROMPTS\n\n`;
+                
+                template += `Character Seed:\n`;
+                template += `What kind of person walks through these sounds? Consider their state of mind, their purpose for being here, what they're running from or toward.\n\n`;
+                
+                template += `Tension Points:\n`;
+                template += `• What sound disrupts the pattern?\n`;
+                template += `• Which sounds are in conflict?\n`;
+                template += `• What's the sound that doesn't belong?\n\n`;
+                
+                template += `The Turning Point:\n`;
+                template += `When do the sounds shift? What moment marks before and after? This could be your story's pivot.\n\n`;
+                
+                template += `Sensory Details:\n`;
+                const exampleSounds = this.recordings.slice(0, 3);
+                if (exampleSounds.length > 0) {
+                    template += `Build from these captured moments:\n`;
+                    exampleSounds.forEach((r, i) => {
+                        template += `  • ${r.notes || 'Recorded sound'} — What does this reveal about the world?\n`;
+                    });
+                    template += `\n`;
+                }
+                
+                template += `Setting Questions:\n`;
+                template += `• Time of day: What does the soundscape tell you?\n`;
+                template += `• Season: What seasonal markers exist in these recordings?\n`;
+                template += `• Weather: How does atmosphere shape the sonic environment?\n`;
+                template += `• Urban/Rural: Where does this story live?\n\n`;
+                
+                template += `═══════════════════════════════════════\n\n`;
+                template += `YOUR STORY SKETCH\n\n`;
+                template += `[Use this space to develop your concept]\n\n`;
+                template += `Opening Image:\n\n\n`;
+                template += `Central Conflict:\n\n\n`;
+                template += `Resolution:\n\n\n`;
+                template += `═══════════════════════════════════════\n`;
+                
+                return template;
+            }
+
+            downloadTemplate(content) {
+                const blob = new Blob([content], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `story-template-${Date.now()}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+
+            loadFromStorage() {
+                this.renderRecordings();
+            }
         }
 
-        function addRecording(audioBlob) {
-            const url = URL.createObjectURL(audioBlob);
-            const li = document.createElement('li');
-            li.textContent = `Recording: ${document.getElementById('soundType').value}`;
-            const audio = document.createElement('audio');
-            audio.controls = true;
-            audio.src = url;
-            li.appendChild(audio);
-            const deleteButton = document.createElement('button');
-            deleteButton.textContent = 'Delete';
-            deleteButton.onclick = () => li.remove();
-            li.appendChild(deleteButton);
-            document.getElementById('recordingsList').appendChild(li);
-        }
-
-        document.getElementById('generateTemplate').addEventListener('click', () => {
-            const notes = document.getElementById('notes').value;
-            const template = `# Story Template\n\n## Sound Type: ${document.getElementById('soundType').value}\n\n## Notes: ${notes}`;
-            const blob = new Blob([template], { type: 'text/plain' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'story_template.txt';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        });
+        // Initialize app
+        const app = new SoundScapeApp();
     </script>
 </body>
 </html>
