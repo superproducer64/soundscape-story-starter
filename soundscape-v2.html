@@ -368,8 +368,8 @@
             <p>Tap the microphone to start</p>
         </div>
 
-        <!-- Debug Info (can be removed in production) -->
-        <div id="debugInfo" class="debug-info"></div>
+        <!-- Debug Info -->
+        <div id="debugInfo" class="debug-info hidden"></div>
     </div>
 
     <script>
@@ -605,7 +605,6 @@
                     }
                     
                     this.showStatus(message, 'error');
-                    alert(message);
                 }
             }
 
